@@ -5,25 +5,24 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Set working directory early so COPY and pip use relative paths cleanly
+WORKDIR /code
 
 RUN pip install --upgrade pip 
-#copy to code directory
-COPY . /code 
 
-#set permissions
+# Copy requirements first to leverage Docker caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-RUN chmod +x /code
+# Copy the rest of the code
+COPY . . 
 
-RUN pip install --no-cache-dir --upgrade -r code/requirements.txt
+# Install your local package in editable mode properly during build time
+RUN pip install -e .
 
 EXPOSE 8005
 
-WORKDIR /code
-
 ENV PYTHONPATH "${PYTHONPATH}:/code"
 
-#CMD pip install -e .
-
-CMD ["python","prediction_model/training_pipeline.py"]
-WORKDIR /code
-CMD ["python","main.py"]
+# Use an entrypoint script or combine commands to run both scripts sequentially
+CMD python prediction_model/training_pipeline.py && python main.py
