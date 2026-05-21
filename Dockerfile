@@ -17,8 +17,8 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 # Copy the rest of the code
 COPY . . 
 
-# Install your local package in editable mode properly during build time
-RUN pip install -e .
+# Install package normally for production
+RUN pip install --no-cache-dir .
 
 EXPOSE 8005
 
