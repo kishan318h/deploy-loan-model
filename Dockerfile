@@ -21,7 +21,7 @@ WORKDIR /code
 
 ENV PYTHONPATH "${PYTHONPATH}:/code"
 
-CMD pip install -e .
+#CMD pip install -e .
 
 CMD ["python","prediction_model/training_pipeline.py"]
 WORKDIR /code
