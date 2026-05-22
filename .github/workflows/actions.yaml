@@ -57,4 +57,4 @@ jobs:
             docker rm my-mlapp 2>/dev/null || true
             
             # 4. Run the new container
-            docker run -d -p 8005:8005 --name my-mlapp ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-mlapp:latest 
+            docker run -d -p 80:8005 --name my-mlapp ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-mlapp:latest 
