@@ -1,28 +1,27 @@
+# Use an official lightweight Python image
 FROM python:3.12-slim
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Prevent Python from writing .pyc files and enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Set working directory early so COPY and pip use relative paths cleanly
-WORKDIR /code
+# Set the working directory inside the container
+WORKDIR /app
 
-RUN pip install --upgrade pip 
-
-# Copy requirements first to leverage Docker caching
+# Copy only the requirements first to leverage Docker caching
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-# Copy the rest of the code
-COPY . . 
+# Install dependencies without storing cache files
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install package normally for production
-RUN pip install --no-cache-dir .
+# Copy the rest of the application code
+COPY . .
 
+# train the model before starting the FastAPI server
+RUN python prediction_model/training_pipeline.py
+
+# Expose the port FastAPI will run on
 EXPOSE 8005
 
-ENV PYTHONPATH "${PYTHONPATH}:/code"
-
 # Use an entrypoint script or combine commands to run both scripts sequentially
-CMD python prediction_model/training_pipeline.py && python main.py
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8005"]
